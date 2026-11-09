@@ -1,0 +1,30 @@
+{
+  "name": "veeollax-care",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/niro1n/veeollax-care#readme",
+  "bugs": {
+    "url": "https://github.com/niro1n/veeollax-care/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/niro1n/veeollax-care.git"
+  },
+  "license": "ISC",
+  "author": "niroin",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test:send": "node src/testSend.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.28.1",
+    "dotenv": "^18.0.10",
+    "node-cron": "^4.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

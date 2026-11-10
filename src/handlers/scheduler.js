@@ -36,7 +36,7 @@ async function sendReminder({ channel, member, category }) {
 
   let gifUrl = null;
   try {
-    gifUrl = await getCategoryGif(category);
+    gifUrl = await getCategoryGif(category, message);
   } catch (error) {
     gifUrl = null;
   }

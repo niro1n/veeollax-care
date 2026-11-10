@@ -13,9 +13,10 @@
   "license": "ISC",
   "author": "niroin",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
+    "start:prod": "bash scripts/deploy.sh",
     "dev": "nodemon src/index.js",
     "test:send": "node src/testSend.js",
     "test:gif": "node src/testGiphy.js"

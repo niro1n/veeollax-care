@@ -22,14 +22,15 @@ client.once(Events.ClientReady, async () => {
 
     console.log(`\n[TEST] Mengirim pesan kategori "${categoryArg}" ke #${channel.name}...`);
 
-    const text = await sendReminder({
+    const result = await sendReminder({
       channel,
       member,
       category: categoryArg,
     });
 
     console.log("\n[SUCCESS] Pesan berhasil dikirim ke Discord!");
-    console.log(`Pesan: "${text}"\n`);
+    console.log(`Pesan: "${result.message}"`);
+    console.log(`GIF: ${result.gifUrl || "(None / Fallback)"}\n`);
   } catch (error) {
     console.error("\n[TEST FAILED]", error);
   } finally {

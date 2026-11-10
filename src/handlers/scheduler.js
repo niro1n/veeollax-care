@@ -3,6 +3,7 @@ const { EmbedBuilder } = require("discord.js");
 
 const scheduleConfig = require("../config/schedule");
 const { getMessage } = require("../services/messageEngine");
+const { getCategoryGif } = require("../services/gifService");
 
 const breakfast = require("../data/messages/breakfast");
 const lunch = require("../data/messages/lunch");
@@ -33,13 +34,24 @@ async function sendReminder({ channel, member, category }) {
 
   const message = getMessage(category, messages, member.displayName);
 
+  let gifUrl = null;
+  try {
+    gifUrl = await getCategoryGif(category);
+  } catch (error) {
+    gifUrl = null;
+  }
+
   const embed = new EmbedBuilder()
     .setColor("#C8A2E8")
     .setDescription(message)
     .setFooter({
-      text: "a little care, every day. ♡",
+      text: "a little care, every day. ♡ • niro | Powered by GIPHY",
     })
     .setTimestamp();
+
+  if (gifUrl) {
+    embed.setImage(gifUrl);
+  }
 
   await channel.send({
     content: `<@${member.id}>`,
@@ -49,7 +61,7 @@ async function sendReminder({ channel, member, category }) {
     },
   });
 
-  return message;
+  return { message, gifUrl };
 }
 
 function startScheduler({ channel, member }) {

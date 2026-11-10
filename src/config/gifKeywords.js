@@ -1,0 +1,46 @@
+module.exports = {
+  defaultRating: "g",
+  limit: 25,
+  categories: {
+    breakfast: [
+      "cute cat morning",
+      "cute cat breakfast",
+      "cat good morning love",
+      "cat waking up cute",
+      "cat yawning cute love",
+      "cute kitten good morning",
+    ],
+    shortBreak: [
+      "cute cat waving",
+      "cute cat hug",
+      "cat sending love",
+      "cute cat heart",
+      "cat blowing kisses",
+      "cute cat cuddling",
+      "cat head pat cute",
+    ],
+    lunch: [
+      "cute cat eating",
+      "hungry cat cute",
+      "cute cat food",
+      "cat lunch time cute",
+      "cute cat munching",
+      "cat eating snack cute",
+    ],
+    dinner: [
+      "cute cat dinner",
+      "cute cat eating dinner",
+      "cat food dinner cute",
+      "cat eating tasty food",
+      "cute cat enjoying meal",
+    ],
+    nightRest: [
+      "sleepy cat cute",
+      "cat goodnight love",
+      "cat sleeping love",
+      "cute kitten sleeping",
+      "cat tucked in bed cute",
+      "cat sweet dreams love",
+    ],
+  },
+};

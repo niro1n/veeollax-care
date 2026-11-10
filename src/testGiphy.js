@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-const { getCategoryGif, clearGifCache } = require("./services/gifService");
+const { getCategoryGif, resolveQueryPool, clearGifCache } = require("./services/gifService");
 const gifKeywords = require("./config/gifKeywords");
 
 async function runGiphyTests() {
@@ -15,18 +15,28 @@ async function runGiphyTests() {
   console.log(`[CONFIG] Default rating: ${gifKeywords.defaultRating}`);
   console.log(`[CONFIG] Configured categories: ${Object.keys(gifKeywords.categories).join(", ")}\n`);
 
-  const categories = ["breakfast", "shortBreak", "lunch", "dinner", "nightRest"];
+  const testCases = [
+    { category: "breakfast", sampleMessage: "good morning! minum air putih dulu, terus jangan lupa sarapan yaa." },
+    { category: "shortBreak", sampleMessage: "take a deep breath. tarik nafas pelan-pelan, and give yourself a moment to relax." },
+    { category: "shortBreak", sampleMessage: "jangan lupa istirahat sejenak yaa, take care dan peluk hangat ♡" },
+    { category: "lunch", sampleMessage: "siang! udah makan siang belum? luangkan waktu sebentar buat makan yaa." },
+    { category: "dinner", sampleMessage: "malam! udah makan malam belum? yuk cari makan malam yang hangat." },
+    { category: "nightRest", sampleMessage: "malam! udah jam segini, yuk sudahi aktivitas hari ini dan siap-siap tidur." },
+  ];
 
-  console.log("--- 1. Testing Category GIF Retrieval ---");
-  for (const cat of categories) {
-    const keywords = gifKeywords.categories[cat];
-    const gifUrl = await getCategoryGif(cat);
-    console.log(`\nCategory: [${cat}]`);
-    console.log(`Keywords pool (${keywords.length}): "${keywords.slice(0, 3).join('", "')}"...`);
+  console.log("--- 1. Testing Context-Aware Category & Message GIF Retrieval ---");
+  for (const tc of testCases) {
+    const pool = resolveQueryPool(tc.category, tc.sampleMessage);
+    const poolLabels = pool.primary.map((item) => item.q).join('", "');
+    const gifUrl = await getCategoryGif(tc.category, tc.sampleMessage);
+
+    console.log(`\nCategory: [${tc.category}]`);
+    console.log(`Message:  "${tc.sampleMessage}"`);
+    console.log(`Matched Queries: "${poolLabels}"`);
     if (gifUrl) {
       console.log(`-> Returned GIF: ${gifUrl}`);
     } else {
-      console.log(`-> Returned GIF: (null - Graceful Fallback)`);
+      console.log(`-> Returned GIF: (null - Graceful Fallback / Rate Limit)`);
     }
   }
 
@@ -38,7 +48,7 @@ async function runGiphyTests() {
   console.log(`First call (${catTest}):  ${firstGif || "(null)"}`);
   console.log(`Second call (${catTest}): ${secondGif || "(null)"}`);
   if (firstGif && secondGif) {
-    console.log(`[OK] Both calls resolved from cache/pool. (Different: ${firstGif !== secondGif})`);
+    console.log(`[OK] Both calls resolved cleanly. (Different: ${firstGif !== secondGif})`);
   } else {
     console.log("[INFO] Caching test passed with graceful fallback.");
   }
@@ -48,8 +58,10 @@ async function runGiphyTests() {
   const originalKey = process.env.GIPHY_API_KEY;
   process.env.GIPHY_API_KEY = "INVALID_KEY_TEST";
 
-  const fallbackResult = await getCategoryGif("lunch");
-  console.log(`Result with invalid key: ${fallbackResult === null ? "null [PASS - Graceful fallback without crash]" : fallbackResult}`);
+  const fallbackWithPool = await getCategoryGif("lunch", "makan siang yuk");
+  const fallbackStrictNull = await getCategoryGif("lunch", "makan siang yuk", { allowFallback: false });
+  console.log(`Result with invalid key (curated fallback): ${fallbackWithPool ? "[PASS] " + fallbackWithPool : "null"}`);
+  console.log(`Result with invalid key (strict null mode): ${fallbackStrictNull === null ? "null [PASS - Graceful fallback without crash]" : fallbackStrictNull}`);
 
   // Restore original key
   process.env.GIPHY_API_KEY = originalKey;

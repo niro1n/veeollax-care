@@ -19,7 +19,8 @@
     "start:prod": "bash scripts/deploy.sh",
     "dev": "nodemon src/index.js",
     "test:send": "node src/testSend.js",
-    "test:gif": "node src/testGiphy.js"
+    "test:gif": "node src/testGiphy.js",
+    "test:delivery": "node src/testDelivery.js"
   },
   "dependencies": {
     "discord.js": "^14.28.1",

@@ -3,6 +3,7 @@ require("dotenv").config();
 const { Client, GatewayIntentBits, Events } = require("discord.js");
 
 const botConfig = require("./config/bot");
+const { delivery: deliveryConfig } = require("./config/delivery");
 const { validateDiscord } = require("./services/discord");
 const { startScheduler } = require("./handlers/scheduler");
 
@@ -29,6 +30,10 @@ client.once(Events.ClientReady, async () => {
     console.log(`[OK] Connected to #${channel.name}`);
 
     console.log(`[OK] Reminder target: ${member.displayName}`);
+
+    console.log(
+      `[OK] Delivery mode: ${deliveryConfig.mode} (fallbackToChannel: ${deliveryConfig.fallbackToChannel})`,
+    );
 
     startScheduler({
       channel,

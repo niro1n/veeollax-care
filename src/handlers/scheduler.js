@@ -2,8 +2,10 @@ const cron = require("node-cron");
 const { EmbedBuilder } = require("discord.js");
 
 const scheduleConfig = require("../config/schedule");
+const { delivery: deliveryConfig } = require("../config/delivery");
 const { getMessage } = require("../services/messageEngine");
 const { getCategoryGif } = require("../services/gifService");
+const { deliverReminder } = require("../services/deliveryService");
 
 const breakfast = require("../data/messages/breakfast");
 const lunch = require("../data/messages/lunch");
@@ -25,7 +27,23 @@ function timeToCron(time) {
   return `${minute} ${hour} * * *`;
 }
 
-async function sendReminder({ channel, member, category }) {
+function buildReminderEmbed({ message, gifUrl }) {
+  const embed = new EmbedBuilder()
+    .setColor("#C8A2E8")
+    .setDescription(message)
+    .setFooter({
+      text: "a little care, every day. ♡ • niro | Powered by GIPHY",
+    })
+    .setTimestamp();
+
+  if (gifUrl) {
+    embed.setImage(gifUrl);
+  }
+
+  return embed;
+}
+
+async function sendReminder({ channel, member, category, label }, options = {}) {
   const messages = messageCollections[category];
 
   if (!messages || messages.length === 0) {
@@ -41,27 +59,21 @@ async function sendReminder({ channel, member, category }) {
     gifUrl = null;
   }
 
-  const embed = new EmbedBuilder()
-    .setColor("#C8A2E8")
-    .setDescription(message)
-    .setFooter({
-      text: "a little care, every day. ♡ • niro | Powered by GIPHY",
-    })
-    .setTimestamp();
+  const embed = buildReminderEmbed({ message, gifUrl });
 
-  if (gifUrl) {
-    embed.setImage(gifUrl);
-  }
-
-  await channel.send({
-    content: `<@${member.id}>`,
-    embeds: [embed],
-    allowedMentions: {
-      users: [member.id],
+  const delivery = await deliverReminder(
+    {
+      channel,
+      member,
+      targetUser: member.user,
+      embed,
+      category,
+      label: label || category,
     },
-  });
+    options,
+  );
 
-  return { message, gifUrl };
+  return { message, gifUrl, delivery };
 }
 
 function startScheduler({ channel, member }) {
@@ -95,13 +107,18 @@ function startScheduler({ channel, member }) {
         console.log(`[TRIGGERED] ${item.name} - ${item.time} WIB`);
 
         try {
-          await sendReminder({
+          const result = await sendReminder({
             channel,
             member,
             category: item.category,
+            label: item.name,
           });
 
-          console.log(`[SUCCESS] ${item.name} delivered.`);
+          if (result.delivery.overallStatus === "partial") {
+            console.warn(`[PARTIAL] ${item.name} delivered with partial destination failure.`);
+          } else {
+            console.log(`[SUCCESS] ${item.name} delivered.`);
+          }
         } catch (error) {
           console.error(`[FAILED] ${item.name}:`, error);
         }
@@ -117,7 +134,10 @@ function startScheduler({ channel, member }) {
   console.log("================================");
   console.log("All reminder schedules registered ♡");
   console.log(`Timezone: ${timezone}`);
+  console.log(
+    `Delivery mode: ${deliveryConfig.mode} (fallback: ${deliveryConfig.fallbackToChannel ? "ON" : "OFF"})`,
+  );
   console.log("================================\n");
 }
 
-module.exports = { startScheduler, sendReminder, messageCollections };
+module.exports = { startScheduler, sendReminder, buildReminderEmbed, messageCollections };

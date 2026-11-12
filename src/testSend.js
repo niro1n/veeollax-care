@@ -20,15 +20,17 @@ client.once(Events.ClientReady, async () => {
   try {
     const { channel, member } = await validateDiscord(client);
 
-    console.log(`\n[TEST] Mengirim pesan kategori "${categoryArg}" ke #${channel.name}...`);
+    console.log(`\n[TEST] Mengirim pesan kategori "${categoryArg}" (target: #${channel.name} & DM ${member.user.tag})...`);
 
     const result = await sendReminder({
       channel,
       member,
       category: categoryArg,
+      label: `Manual Test (${categoryArg})`,
     });
 
-    console.log("\n[SUCCESS] Pesan berhasil dikirim ke Discord!");
+    console.log(`\n[RESULT] Status pengiriman: ${result.delivery.overallStatus.toUpperCase()}`);
+    console.log(`Mode: ${result.delivery.mode} | DM: ${result.delivery.dm.status} | Channel: ${result.delivery.channel.status}`);
     console.log(`Pesan: "${result.message}"`);
     console.log(`GIF: ${result.gifUrl || "(None / Fallback)"}\n`);
   } catch (error) {
